@@ -3,12 +3,12 @@
 //  50音練習
 //
 //  Created by 陳韋綸 on 2022/3/19.
-//
+//  Fix iOS16 by Alex on 2023/1/23
 
 import UIKit
 import AVFoundation
 
-class HomePageViewController: UIViewController {
+class HomePageViewController: UIViewController,AVSpeechSynthesizerDelegate {
     
     private var collectionView: UICollectionView?
     private let changeToneBtn: UIButton = {
@@ -62,22 +62,31 @@ class HomePageViewController: UIViewController {
         
         changeToneBtn.addTarget(self, action: #selector(didTapChangeTone), for: .touchUpInside)
         speakStartBtn.addTarget(self, action: #selector(didTapSpeakStart), for: .touchUpInside)
+        
+        model.delegate = self
     }
-    
+    let model = AVSpeechSynthesizer()
+
     @objc private func didplus() {
+        if y >= tone.count {
+            y = 0
+            return
+        }
         let utten = AVSpeechUtterance(string: tone[y])
         speakToneLabel.text = tone[y]
+        
         y += 1
         collectionView?.reloadData()
+        //https://gist.github.com/Koze/d1de49c24fc28375a9e314c72f7fdae4
+//        utten.voice = AVSpeechSynthesisVoice(language: "ja-JP, Name: Kyoko, Quality: Default [com.apple.ttsbundle.Kyoko-compact]")
         utten.voice = AVSpeechSynthesisVoice(language: "ja-JP")
-       let model = AVSpeechSynthesizer()
         model.speak(utten)
     }
     
     @objc private func didTapSpeakStart() {
         if time == nil {
             speakStartBtn.isSelected = true
-            y = 0
+          //  y = 0
             time = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(didplus), userInfo: nil, repeats: true)
         }
         else {
@@ -154,7 +163,7 @@ extension HomePageViewController: UICollectionViewDelegate, UICollectionViewData
         speakToneLabel.text = tone[indexPath.row]
         let utten = AVSpeechUtterance(string: tone[indexPath.row])
         utten.voice = AVSpeechSynthesisVoice(language: "ja-JP")
-        let model = AVSpeechSynthesizer()
+        //let model = AVSpeechSynthesizer()
         model.speak(utten)
     }
 }
